@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take your time</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Georgia, serif;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(244, 114, 182, .06), transparent 25%),
+                radial-gradient(circle at 80% 30%, rgba(255, 255, 255, .03), transparent 25%),
+                radial-gradient(circle at center, #0a0a0f, #000000);
+            color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* HEARTS */
+        canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: .65;
+            /* softer so text stays readable */
+        }
+
+        /* INTRO */
+        #intro {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .92);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .intro-box {
+            padding: 30px;
+        }
+
+        .intro-box h1 {
+            font-size: 30px;
+            font-weight: normal;
+            margin-bottom: 12px;
+        }
+
+        .intro-box p {
+            opacity: .72;
+            margin-bottom: 26px;
+            font-size: 16px;
+        }
+
+        #playBtn {
+            padding: 12px 26px;
+            font-size: 15px;
+            border: 1px solid #f472b6;
+            background: transparent;
+            color: #f472b6;
+            border-radius: 28px;
+            cursor: pointer;
+            transition: .35s;
+        }
+
+        #playBtn:hover {
+            background: #f472b6;
+            color: #0a0a0f;
+            transform: translateY(-2px);
+        }
+
+        /* CONTENT */
+        .container {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 90px 24px 140px;
+        }
+
+        .text-wrap {
+            width: 100%;
+            max-width: 700px;
+            background: rgba(255, 255, 255, .035);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 22px;
+            padding: 34px 28px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 30px rgba(255, 255, 255, .03);
+        }
+
+        #text {
+            font-size: 14px;
+            line-height: 2;
+            letter-spacing: .2px;
+            color: rgba(255, 255, 255, .95);
+            text-shadow: 0 0 8px rgba(0, 0, 0, .45);
+        }
+
+        /* cursor */
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background: rgba(244, 114, 182, .75);
+            margin-left: 4px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            border-radius: 3px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* fade in */
+        .fade {
+            animation: fadeIn 1.2s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- INTRO -->
+    <div id="intro">
+        <div class="intro-box fade">
+            <h1>Please take your time</h1>
+
+
+            <p>Put earphones for the best experience</p>
+            <button id="playBtn">Begin</button>
+        </div>
+    </div>
+
+    <!-- HEARTS -->
+    <canvas id="hearts"></canvas>
+
+    <!-- CONTENT -->
+    <div class="container">
+        <div class="text-wrap">
+            <div id="text"></div>
+        </div>
+    </div>
+
+    <!-- MUSIC -->
+    <audio id="bgm" loop>
+        <source src="background.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        /* ==========================
+           HEART PARTICLES (NON-INTRUSIVE)
+        ========================== */
+        const canvas = document.getElementById("hearts");
+        const ctx = canvas.getContext("2d");
+
+        function resize() {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        const hearts = [];
+
+        function createHeart() {
+            hearts.push({
+                x: Math.random() * canvas.width,
+                y: canvas.height + 30,
+                size: Math.random() * 5 + 2,
+                speed: Math.random() * .65 + .25,
+                opacity: Math.random() * .25 + .08, // subtle
+                drift: (Math.random() - .5) * .25
+            });
+        }
+
+        function drawHeart(x, y, s, o) {
+            ctx.globalAlpha = o;
+            ctx.fillStyle = "#f472b6";
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            ctx.bezierCurveTo(
+                x - s, y - s,
+                x - s * 2, y + s / 2,
+                x, y + s * 2
+            );
+
+            ctx.bezierCurveTo(
+                x + s * 2, y + s / 2,
+                x + s, y - s,
+                x, y
+            );
+
+            ctx.fill();
+        }
+
+        function animateHearts() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (hearts.length < 32) { // lower count so text remains hero
+                createHeart();
+            }
+
+            hearts.forEach((h, i) => {
+                h.y -= h.speed;
+                h.x += h.drift;
+
+                drawHeart(h.x, h.y, h.size, h.opacity);
+
+                if (h.y < -30) {
+                    hearts.splice(i, 1);
+                }
+            });
+
+            requestAnimationFrame(animateHearts);
+        }
+        animateHearts();
+
+        /* ==========================
+           TYPEWRITER
+        ========================== */
+        const textEl = document.getElementById("text");
+        let lines = [];
+
+        function rand(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function setCursor() {
+            if (!document.querySelector(".cursor")) {
+                textEl.innerHTML += '<span class="cursor"></span>';
+            }
+        }
+
+        function removeCursor() {
+            const c = document.querySelector(".cursor");
+            if (c) c.remove();
+        }
+
+        async function typeLine(line) {
+
+            removeCursor();
+
+            const container = document.querySelector(".container");
+
+            for (let char of line) {
+
+                textEl.innerHTML += char;
+                setCursor();
+
+                // auto scroll while typing
+                container.scrollTop = container.scrollHeight;
+
+                let delay = rand(24, 58);
+
+                if (char === ",") delay += rand(140, 260);
+                if (char === ".") delay += rand(260, 520);
+
+                await new Promise(r => setTimeout(r, delay));
+
+                removeCursor();
+            }
+
+            textEl.innerHTML += "<br>";
+
+            // scroll after line completes
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        async function startTyping() {
+
+            for (let line of lines) {
+
+                await typeLine(line);
+
+                let pause = line.trim() === ""
+                    ? rand(700, 1200)
+                    : rand(1200, 1900);
+
+                await new Promise(r => setTimeout(r, pause));
+
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: "smooth"
+                });
+            }
+
+            setCursor();
+        }
+
+        /* ==========================
+           LOAD TEXT
+        ========================== */
+        fetch("text.txt")
+            .then(r => r.text())
+            .then(data => {
+                lines = data.split("\n");
+            });
+
+        /* ==========================
+           AUDIO + START
+        ========================== */
+        const audio = document.getElementById("bgm");
+        const intro = document.getElementById("intro");
+        const btn = document.getElementById("playBtn");
+
+        btn.addEventListener("click", async () => {
+
+            intro.style.opacity = "0";
+            intro.style.transition = "1s ease";
+
+            setTimeout(() => {
+                intro.style.display = "none";
+            }, 1000);
+
+            try {
+                audio.volume = 0;
+                await audio.play();
+
+                let v = 0;
+
+                const fade = setInterval(() => {
+                    v += 0.01;
+
+                    if (v >= 0.14) {
+                        audio.volume = 0.14;
+                        clearInterval(fade);
+                    } else {
+                        audio.volume = v;
+                    }
+                }, 220);
+
+            } catch (e) { }
+
+            startTyping();
+        });
+    </script>
+
+</body>
+
+</html>
