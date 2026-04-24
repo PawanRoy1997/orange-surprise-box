@@ -104,11 +104,18 @@
         }
 
         #text {
-            font-size: 14px;
+            font-size: 24px;
             line-height: 2;
             letter-spacing: .2px;
             color: rgba(255, 255, 255, .95);
             text-shadow: 0 0 8px rgba(0, 0, 0, .45);
+        }
+
+        @media (max-width: 768px) {
+            #text {
+                font-size: 12px;
+                line-height: 1.8;
+            }
         }
 
         /* cursor */
@@ -303,7 +310,7 @@
             // scroll after line completes
             container.scrollTop = container.scrollHeight;
         }
-        
+
         async function startTyping() {
 
             for (let line of lines) {
