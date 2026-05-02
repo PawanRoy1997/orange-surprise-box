@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For You</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f0f12;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .bg-glow {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(120px);
+      background: rgba(255, 182, 193, 0.25);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      transition: all 1.2s ease;
+    }
+
+    /* 🎉 Emoji particles */
+    .particle {
+      position: fixed;
+      font-size: 20px;
+      animation: float 10s linear infinite;
+      z-index: 0;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-10vh) translateX(30px);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .slideshow {
+      width: 100%;
+      height: 60vh;
+      max-height: 450px;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .slide img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      border-radius: 16px;
+    }
+
+    .active {
+      opacity: 1;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 25px;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 90%;
+    }
+
+    .caption {
+      margin-top: 10px;
+      font-size: 14px;
+      opacity: 0.9;
+      white-space: pre-line;
+    }
+
+    #startScreen {
+      position: fixed;
+      inset: 0;
+      background: #0f0f12;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 999;
+    }
+
+    #startScreen button {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #lockScreen {
+      position: fixed;
+      inset: 0;
+      background: #0f0f12;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    #lockScreen input {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 10px;
+    }
+
+    #lockScreen button {
+      margin-top: 10px;
+      padding: 10px 16px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🔐 LOCK SCREEN -->
+  <div id="lockScreen">
+    <h2>Enter Password</h2>
+    <input id="passwordInput" type="password" placeholder="Password" />
+    <button onclick="unlock()">Unlock</button>
+    <p id="error" style="color:#ff6b6b;"></p>
+  </div>
+
+  <!-- ▶ START SCREEN -->
+  <div id="startScreen">
+    <h2>For you</h2>
+    <p style="opacity:0.7;">A small experience I made</p>
+    <button onclick="startExperience()">▶ Play Experience</button>
+  </div>
+
+  <div class="bg-glow" id="glow"></div>
+
+  <div class="container">
+    <h2>For you</h2>
+
+    <div class="slideshow">
+      <div class="slide active"><img id="img0"></div>
+      <div class="slide"><img id="img1"></div>
+      <div class="slide"><img id="img2"></div>
+      <div class="slide"><img id="img3"></div>
+      <div class="slide"><img id="img4"></div>
+      <div class="slide"><img id="img5"></div>
+      <div class="slide"><img id="img6"></div>
+
+      <div class="slide">
+        <div class="card">
+          <p>Happy Birthday 🎉</p>
+          <p>You don’t just find bugs…</p>
+          <p>You find things we didn’t even know existed 😄</p>
+          <p style="font-weight:bold; font-size:18px;">
+            Our builds fear you. And honestly… so do we.
+          </p>
+          <p>Stay awesome, QA legend 🐞🔥</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="caption" id="caption"></div>
+  </div>
+
+  <audio id="music"></audio>
+
+  <script src="crypto.js"></script>
+
+  <script>
+    let index = 0;
+    let auto;
+    let started = false;
+
+    const slides = document.querySelectorAll(".slide");
+
+    const captions = [
+      "🎵 Happy birthday to you,\nOnce a cute baby, it’s true,\nWho knew that tiny hands,\nWould file bugs on us too 😄",
+
+      "🎵 Happy birthday to you,\nSitting classy like you do,\nLooking calm in the pic,\nBut breaking builds in the queue 😆",
+
+      "🎵 Happy birthday to you,\nIn that saree, shy view,\nActing all innocent there,\nBut your test cases? Not few 😏",
+
+      "🎵 Happy birthday to you,\nThat confident stare is true,\nOne look at our code,\nAnd you find issue #102 😄",
+
+      "🎵 Happy birthday to you,\nHiding face like you do,\nYou can hide from the cam,\nBut bugs can’t hide from you 😂",
+
+      "🎵 Happy birthday to you,\nStanding stylish in view,\nLooking cool in the frame,\nWhile rejecting build v2 😆",
+
+      "🎵 Happy birthday to you,\nAnother pose, strong and true,\nEvery sprint you remind us,\n“Devs… I’m watching you” 👀"
+    ];
+
+    function show(i) {
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      document.getElementById("caption").innerText = captions[i] || "";
+    }
+
+    function next() {
+      if (index < slides.length - 1) {
+        index++;
+        show(index);
+      } else clearInterval(auto);
+    }
+
+    const imageSlides = [
+      "img1",
+      "img2",
+      "img3",
+      "img4",
+      "img2",
+      "img5",
+      "img6",
+      "img2"
+    ];
+
+    async function unlock() {
+      const password = document.getElementById("passwordInput").value;
+
+      try {
+        for (let i = 0; i < 8; i++) {
+          const decrypted = await decryptFile(password, `enc/image${i + 1}.bin`);
+          const blob = new Blob([decrypted]);
+          document.getElementById(imageSlides[i]).src = URL.createObjectURL(blob);
+        }
+
+        const babyDecrypted = await decryptFile(password, `enc/baby.bin`);
+        document.getElementById("img0").src = URL.createObjectURL(new Blob([babyDecrypted]));
+
+        const musicData = await decryptFile(password, "enc/bdmusic.bin");
+        document.getElementById("music").src = URL.createObjectURL(new Blob([musicData]));
+
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("startScreen").style.display = "flex";
+
+      } catch (e) {
+        document.getElementById("error").innerText = e;
+      }
+    }
+
+    const music = document.getElementById("music");
+
+    function startExperience() {
+      if (started) return;
+      started = true;
+
+      document.getElementById("startScreen").style.display = "none";
+
+      music.volume = 0;
+      music.currentTime = 0;
+      music.play();
+
+      let v = 0;
+      let fade = setInterval(() => {
+        if (v < 1) {
+          v += 0.05;
+          music.volume = v;
+        } else clearInterval(fade);
+      }, 80);
+
+      show(index);
+      auto = setInterval(next, 15500);
+
+      pulseGlow();
+    }
+
+    function pulseGlow() {
+      const glow = document.getElementById("glow");
+      glow.style.width = (420 + Math.random() * 120) + "px";
+      glow.style.height = (420 + Math.random() * 120) + "px";
+
+      setTimeout(() => {
+        if (started) pulseGlow();
+      }, 1200);
+    }
+
+    /* 🎉 Emoji Particles */
+    const particleIcons = ["🎁", "🎂", "🎉", "✨", "🎈", "🐞", "🥳"];
+
+    for (let i = 0; i < 25; i++) {
+      let p = document.createElement("div");
+      p.className = "particle";
+
+      p.innerText = particleIcons[Math.floor(Math.random() * particleIcons.length)];
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.animationDuration = (6 + Math.random() * 6) + "s";
+      p.style.fontSize = (16 + Math.random() * 16) + "px";
+
+      document.body.appendChild(p);
+    }
+  </script>
+
+</body>
+
+</html>
