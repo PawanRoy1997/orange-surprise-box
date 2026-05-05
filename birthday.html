@@ -126,6 +126,8 @@
       padding: 14px 20px;
       border: none;
       border-radius: 30px;
+      background: (rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url('https://i.pinimg.com/736x/c0/7e/ad/c07ead9944eae33b8ca405c883435fe8.jpg') center/cover no-repeat;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
@@ -134,7 +136,9 @@
     #lockScreen {
       position: fixed;
       inset: 0;
-      background: #0f0f12;
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url('https://i.pinimg.com/736x/c0/7e/ad/c07ead9944eae33b8ca405c883435fe8.jpg') center/cover no-repeat;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -163,17 +167,21 @@
 
   <!-- 🔐 LOCK SCREEN -->
   <div id="lockScreen">
-    <h2>Enter Password</h2>
-    <input id="passwordInput" type="password" placeholder="Password" />
-    <button onclick="unlock()">Unlock</button>
+    <h2>✨ Magic mirror on the wall… ✨</h2>
+    <h3>What do you call one who charms all?</h3>
+    <input id="passwordInput" type="password" placeholder="One enchanting word..." />
+    <button onclick="unlock()">Reveal your reflection</button>
     <p id="error" style="color:#ff6b6b;"></p>
   </div>
 
   <!-- ▶ START SCREEN -->
   <div id="startScreen">
-    <h2>For you</h2>
-    <p style="opacity:0.7;">A small experience I made</p>
-    <button onclick="startExperience()">▶ Play Experience</button>
+    <h2>✨ The mirror smiles ✨</h2>
+    <p style="opacity:0.7;">
+      Some things are not spoken aloud... they are whispered by the heart.<br>
+      The mirror has one more truth to show you.
+    </p>
+    <button onclick="startExperience()">🍎 Reveal what it sees</button>
   </div>
 
   <div class="bg-glow" id="glow"></div>
