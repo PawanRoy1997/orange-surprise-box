@@ -335,11 +335,24 @@
         /* ==========================
            LOAD TEXT
         ========================== */
-        fetch("text.txt")
-            .then(r => r.text())
+        const params = new URLSearchParams(window.location.search);
+        const file = params.get("file") || "text.txt";
+
+        fetch(file)
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error(`Failed to load ${file}`);
+                }
+                return r.text();
+            })
             .then(data => {
                 lines = data.split("\n");
+            })
+            .catch(err => {
+                console.error(err);
+                lines = ["Unable to load the message."];
             });
+
 
         /* ==========================
            AUDIO + START
