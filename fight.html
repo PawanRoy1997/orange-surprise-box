@@ -64,7 +64,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 const CONFIG = {
   PASSWORD: "shiny",              // answer to "Your eyes are ..."
   AUDIO_SRC: "Fight with you.mp3",        // your song, keep it next to this file
-  IMAGE_SRC: "fight.jpeg",        // put your generated image next to this file
+  //IMAGE_SRC: "fight.jpeg",        // put your generated image next to this file
   // Paste lyrics here. Blank line between stanzas. Timing is automatic.
   LYRICS_TEXT: `
 One's got a keyboard, one's got a bug,
@@ -171,7 +171,9 @@ async function tryUnlock(){
   if($("pw").value.trim().toLowerCase() === CONFIG.PASSWORD.toLowerCase()) {
     const decrypted = await decryptFile(CONFIG.PASSWORD, `enc/fight.bin`);
     const blob = new Blob([decrypted]);
-    document.getElementById("bg").style.backgroundImage = URL.createObjectURL(blob);
+    // document.getElementById("bg").style.backgroundImage = URL.createObjectURL(blob);
+    setImage(URL.createObjectURL(blob));
+    const probe = new Image(); probe.onerror = () => $("pick").style.display = "flex"; probe.src = URL.createObjectURL(blob);
     start();
   }
   else{
@@ -187,11 +189,10 @@ $("pw").addEventListener("keydown", e => e.key === "Enter" && tryUnlock());
 function start(){
   $("lock").style.display = "none";
   $("stage").style.display = "block";
-  setImage(CONFIG.IMAGE_SRC);
   au.src =  (CONFIG.AUDIO_SRC);
   au.onerror = () => $("pick").style.display = "flex";   // files missing -> show pickers
   $("bg").onerror = null;
-  const probe = new Image(); probe.onerror = () => $("pick").style.display = "flex"; probe.src = CONFIG.IMAGE_SRC;
+  // const probe = new Image(); probe.onerror = () => $("pick").style.display = "flex"; probe.src = CONFIG.IMAGE_SRC;
   au.play().catch(()=>{});
   setupAnalyser();
   resize(); started = true; requestAnimationFrame(frame);
