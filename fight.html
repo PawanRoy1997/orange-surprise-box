@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dev vs QA</title>
+<style>
+:root{--red:#ff2a4d;--cyan:#27f3ff;--b:0}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#000;color:#fff;font-family:"Courier New",monospace;overflow:hidden}
+#bg{position:fixed;inset:0;background:#120008 center/cover no-repeat;transform:scale(calc(1.03 + var(--b)*.05));transition:transform .08s}
+#shade{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.75));}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+#lock{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#05000a;text-align:center;padding:20px}
+#lock h1{font-size:14px;letter-spacing:.5em;color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
+#hint{font-size:clamp(22px,5vw,38px);color:var(--red);text-shadow:0 0 18px var(--red)}
+#pw{background:transparent;border:1px solid var(--cyan);color:#fff;padding:12px 16px;font:inherit;font-size:20px;text-align:center;outline:none;box-shadow:0 0 14px rgba(39,243,255,.4)}
+#go{background:var(--red);border:0;color:#000;padding:10px 28px;font:inherit;font-weight:bold;letter-spacing:.2em;cursor:pointer;box-shadow:0 0 18px var(--red)}
+#msg{height:18px;font-size:13px;color:var(--red)}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#stage{position:fixed;inset:0;display:none}
+#lyrics{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.ly{position:absolute;font-size:clamp(22px,4.5vw,56px);font-weight:bold;max-width:80vw;color:#fff;
+ text-shadow:0 0 10px var(--red),0 0 28px var(--red),2px 0 var(--cyan);
+ animation:fl 7s ease-in-out forwards;will-change:transform,opacity}
+@keyframes fl{0%{opacity:0;transform:translate(0,30px) scale(.8)}12%{opacity:1}
+ 80%{opacity:1}100%{opacity:0;transform:translate(var(--dx),-120px) scale(1.15) rotate(var(--r))}}
+#lyrics.beat{transform:scale(calc(1 + var(--b)*.04))}
+#ui{position:fixed;left:12px;bottom:12px;z-index:5;display:flex;gap:8px;font-size:12px}
+#ui button,#ui label{background:rgba(0,0,0,.55);border:1px solid var(--cyan);color:var(--cyan);padding:6px 10px;cursor:pointer;font:inherit}
+#syncbox{display:none;position:fixed;inset:auto 0 70px 0;z-index:6;margin:auto;max-width:560px;text-align:center;background:rgba(0,0,0,.8);border:1px solid var(--red);padding:16px;font-size:15px}
+#syncbox textarea{width:100%;height:70px;background:#000;color:var(--cyan);border:1px solid var(--cyan);font:inherit}
+#pick{display:none;position:fixed;top:12px;right:12px;z-index:5;gap:8px;font-size:12px;flex-direction:column;background:rgba(0,0,0,.6);padding:10px;border:1px solid var(--red)}
+#pick label{color:var(--cyan)}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <h1>// RESTRICTED: QA vs DEV //</h1>
+  <div id="hint">Your eyes are</div>
+  <input id="pw" type="password" placeholder="..." autocomplete="off" autofocus>
+  <button id="go">ENTER</button>
+  <div id="msg"></div>
+</div>
+
+<div id="stage">
+  <div id="bg"></div><div id="shade"></div>
+  <canvas id="cv"></canvas>
+  <div id="lyrics"></div>
+  <div id="ui"><button id="pp">Pause</button><button id="rs">Restart</button><button id="sy">Sync</button><button id="m1">-0.5s</button><button id="p1">+0.5s</button></div>
+  <div id="syncbox"></div>
+  <div id="pick">
+    <label>Song: <input type="file" id="fa" accept="audio/*"></label>
+    <label>Image: <input type="file" id="fi" accept="image/*"></label>
+  </div>
+</div>
+<audio id="au" loop crossorigin="anonymous"></audio>
+
+<script src="crypto.js"></script>
+<script>
+/* ================== CONFIG: EDIT THIS ================== */
+const CONFIG = {
+  PASSWORD: "shiny",              // answer to "Your eyes are ..."
+  AUDIO_SRC: "Fight with you.mp3",        // your song, keep it next to this file
+  IMAGE_SRC: "fight.jpeg",        // put your generated image next to this file
+  // Paste lyrics here. Blank line between stanzas. Timing is automatic.
+  LYRICS_TEXT: `
+One's got a keyboard, one's got a bug,
+One says "It's working!"
+One says "What the hell, bruh?"
+No strings attached, no rules to obey,
+Just two mad souls ruining everyone's day!
+
+He's got the code, she's got the test,
+He says he's perfect, she says "Not impressed!"
+He builds a feature, she breaks it down,
+He's wearing a smile, she's wearing a crown.
+"Works on my machine!" — that's his excuse,
+"Show me the proof!" — she's got no truce.
+They fight like thunder, laugh like fools,
+Two little rebels breaking all the rules.
+
+She steals his peace, he steals her fries,
+She rolls her eyes, he tells his lies.
+They've got a rhythm nobody understands,
+A little bit of madness, a high-five band!
+
+Oh-oh-oh! What is going on?
+One writes the code, one proves him wrong!
+They roast, they boast, they drive folks insane,
+Then help each other through the madness again!
+Hey! Hey! Don't get it twisted!
+There's no love story, don't get it listed!
+Just two crazy minds on a collision course,
+A little bit of chaos, a friendship with force!
+Not a thing! Not a thing!
+Just the weirdest duo in the whole damn ring!
+Not a thing! Not a thing!
+But the way they act? Well, that's everything!
+
+She says "You're stupid!" He says "You're worse!"
+Five minutes later, they're sharing a curse.
+He fixes her laptop, she fixes his bugs,
+They exchange insults instead of hugs.
+The office is watching, the rumours are loud,
+"Something is cooking!" says half the crowd.
+They just look at each other and laugh away,
+"Get a life, people! We've got bugs to slay!"
+
+When she's stuck, he's already there,
+When he's in trouble, she pretends not to care.
+A thousand arguments, a million jokes,
+A friendship so chaotic, even logic chokes!
+
+Oh-oh-oh! What is going on?
+One writes the code, one proves him wrong!
+They roast, they boast, they drive folks insane,
+Then help each other through the madness again!
+Hey! Hey! Don't get it twisted!
+There's no love story, don't get it listed!
+Just two crazy minds on a collision course,
+A little bit of chaos, a friendship with force!
+Not a thing! Not a thing!
+Just the weirdest duo in the whole damn ring!
+Not a thing! Not a thing!
+But the way they act? Well, that's everything!
+
+No roses, no dates, no candlelight,
+Just "Check this bug!" at half past night.
+No butterflies, no movie scene,
+Just QA fighting with a coding machine!
+No promises, no fairytale,
+Just "Your code sucks!" and "Your tests will fail!"
+And if the world thinks there's something to see,
+Well, that's their problem, not our comedy!
+
+Oh-oh-oh! Let the whole world know,
+We're the bug and feature, the high and low!
+We fight, we laugh, we break the routine,
+The wildest QA and the craziest dev team!
+Hey! Hey! Keep your theories away!
+We're just two lunatics saving the day!
+No love, no label, no grand design,
+Just your favourite disaster working overtime!
+Not a thing! Not a thing!
+No hidden romance, no wedding ring!
+Not a thing! Not a thing!
+Just two crazy friends doing their own damn thing!
+
+Dev: "My code is flawless."
+QA: "Your code is a crime."
+Dev: "You're impossible."
+QA: "And yet, you need me."
+Both: "HAHAHAHA!"
+Build passed. Tests failed. Friendship intact.
+`,
+  START_OFFSET: 0,   // seconds of intro before first vocal (auto-timing)
+  END_OFFSET: 0,     // seconds of outro after last vocal (auto-timing)
+  STANZA_TIMES: [0.5, 12, 40, 56, 82, 100, 107, 130, 157, 196] // after using Sync, paste result here, e.g. [12.4, 31.0, 55.2]
+};
+/* ======================================================= */
+
+const $ = id => document.getElementById(id);
+const au = $("au"), cv = $("cv"), ctx = cv.getContext("2d");
+let analyser, data, usingSynth = false, started = false;
+
+/* ---- password ---- */
+async function tryUnlock(){
+  if($("pw").value.trim().toLowerCase() === CONFIG.PASSWORD.toLowerCase()) {
+    const decrypted = await decryptFile(CONFIG.PASSWORD, `enc/fight.bin`);
+    const blob = new Blob([decrypted]);
+    document.getElementById("bg").style.backgroundImage = URL.createObjectURL(blob);
+    start();
+  }
+  else{
+    $("msg").textContent = "ACCESS DENIED. Look closer.";
+    $("lock").classList.remove("shake"); void $("lock").offsetWidth; $("lock").classList.add("shake");
+    $("pw").value = "";
+  }
+}
+$("go").onclick = tryUnlock;
+$("pw").addEventListener("keydown", e => e.key === "Enter" && tryUnlock());
+
+/* ---- start show (runs on user click so audio is allowed) ---- */
+function start(){
+  $("lock").style.display = "none";
+  $("stage").style.display = "block";
+  setImage(CONFIG.IMAGE_SRC);
+  au.src =  (CONFIG.AUDIO_SRC);
+  au.onerror = () => $("pick").style.display = "flex";   // files missing -> show pickers
+  $("bg").onerror = null;
+  const probe = new Image(); probe.onerror = () => $("pick").style.display = "flex"; probe.src = CONFIG.IMAGE_SRC;
+  au.play().catch(()=>{});
+  setupAnalyser();
+  resize(); started = true; requestAnimationFrame(frame);
+}
+function setImage(u){ $("bg").style.backgroundImage = `url("${u}")`; }
+
+function setupAnalyser(){
+  // Real analysis only works with http(s) or blob URLs. On file:// we use a synthetic beat.
+  if(location.protocol === "file:" && !au.src.startsWith("blob:")){ usingSynth = true; return; }
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ac = window.__ac || (window.__ac = new AC());
+    if(ac.state === "suspended") ac.resume();
+    if(!window.__src){
+      window.__src = ac.createMediaElementSource(au);
+      analyser = ac.createAnalyser(); analyser.fftSize = 512; analyser.smoothingTimeConstant = .8;
+      window.__src.connect(analyser); analyser.connect(ac.destination);
+      data = new Uint8Array(analyser.frequencyBinCount);
+    }
+  }catch(e){ usingSynth = true; }
+}
+
+/* ---- file pickers (fallback) ---- */
+$("fa").onchange = e => { const f=e.target.files[0]; if(!f) return;
+  au.src = URL.createObjectURL(f); usingSynth=false; setupAnalyser(); au.play(); lastLine=-1; };
+$("fi").onchange = e => { const f=e.target.files[0]; if(f) setImage(URL.createObjectURL(f)); };
+$("pp").onclick = () => { if(au.paused){au.play();$("pp").textContent="Pause"}else{au.pause();$("pp").textContent="Play"} };
+$("rs").onclick = () => { au.currentTime = 0; lastLine = -1; au.play(); };
+
+/* ---- audio energy ---- */
+const bins = 64; let spec = new Array(bins).fill(0), bass = 0;
+function readAudio(t){
+  if(analyser && !usingSynth){
+    analyser.getByteFrequencyData(data);
+    for(let i=0;i<bins;i++) spec[i] = data[i]/255;
+    bass = (data[1]+data[2]+data[3]+data[4])/4/255;
+  }else{
+    const beat = Math.pow(Math.max(0, Math.sin(t*Math.PI*2*2)), 6); // ~120 bpm pulse
+    bass = au.paused ? 0 : .25 + beat*.7;
+    for(let i=0;i<bins;i++) spec[i] = au.paused ? 0 : Math.max(0, (.35+.4*Math.sin(t*3+i*.35))*(1-i/bins*.7) + beat*.3*Math.random());
+  }
+}
+
+/* ---- wireframe synth terrain ---- */
+const ROWS = 26; let rows = [], lastPush = 0;
+function resize(){ cv.width = innerWidth*devicePixelRatio; cv.height = innerHeight*devicePixelRatio; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); }
+addEventListener("resize", resize);
+
+function drawTerrain(t){
+  const W = innerWidth, H = innerHeight, hz = H*.52;
+  if(t - lastPush > .06){ lastPush = t;
+    const r = []; for(let i=0;i<bins;i++){ const k = i<bins/2? i : bins-1-i; r.push(spec[Math.min(bins-1,k*2)]); }
+    rows.unshift(r); if(rows.length>ROWS) rows.pop();
+  }
+  ctx.clearRect(0,0,W,H);
+  ctx.globalCompositeOperation = "lighter"; ctx.lineWidth = 1.4;
+  // sun-like horizon glow
+  ctx.strokeStyle = `rgba(255,42,77,${.25+bass*.5})`; ctx.beginPath(); ctx.moveTo(0,hz); ctx.lineTo(W,hz); ctx.stroke();
+  rows.forEach((r,ri)=>{
+    const z = ri/ROWS, p = Math.pow(z,1.8);
+    const y0 = hz + p*(H-hz)*.95, sc = .15 + p*1.6;
+    ctx.strokeStyle = ri%2 ? `rgba(39,243,255,${.9-z*.7})` : `rgba(255,42,77,${.9-z*.7})`;
+    ctx.beginPath();
+    r.forEach((v,i)=>{
+      const x = W/2 + (i/(bins-1)-.5)*W*1.5*sc;
+      const y = y0 - v*H*.32*sc;
+      i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+    });
+    ctx.stroke();
+    // cross lines to previous row
+    if(ri>0){
+      const q = rows[ri-1], pp = Math.pow((ri-1)/ROWS,1.8), yy = hz + pp*(H-hz)*.95, ss = .15+pp*1.6;
+      ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.beginPath();
+      for(let i=0;i<bins;i+=3){
+        ctx.moveTo(W/2+(i/(bins-1)-.5)*W*1.5*sc, y0 - r[i]*H*.32*sc);
+        ctx.lineTo(W/2+(i/(bins-1)-.5)*W*1.5*ss, yy - q[i]*H*.32*ss);
+      } ctx.stroke();
+    }
+  });
+  // oscilloscope wire across the top
+  ctx.strokeStyle = `rgba(39,243,255,${.5+bass*.5})`; ctx.lineWidth = 2; ctx.beginPath();
+  for(let i=0;i<bins;i++){ const x=i/(bins-1)*W, y=H*.12 + Math.sin(i*.6+t*6)*spec[i]*H*.07; i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+  ctx.stroke(); ctx.globalCompositeOperation = "source-over";
+}
+
+/* ---- lyrics ---- */
+let lastLine = -1;
+let adj = 0;
+const stanzas = CONFIG.LYRICS_TEXT.trim().split(/\n\s*\n/).map(x=>x.split("\n").map(l=>l.trim()).filter(Boolean)).filter(x=>x.length);
+function lineTimes(){
+  const dur = au.duration && isFinite(au.duration) ? au.duration : 180;
+  const st = CONFIG.START_OFFSET, en = dur - CONFIG.END_OFFSET;
+  const w = stanzas.map(x=>x.join("").length + 25);
+  const tot = w.reduce((a,b)=>a+b,0);
+  let starts = [], acc = 0;
+  const saved = CONFIG.STANZA_TIMES && CONFIG.STANZA_TIMES.length === stanzas.length ? CONFIG.STANZA_TIMES : null;
+  stanzas.forEach((_,i)=>{ starts.push(saved ? saved[i] : st + acc/tot*(en-st)); acc += w[i]; });
+  const out = [];
+  stanzas.forEach((lines,i)=>{
+    const end = i+1 < starts.length ? starts[i+1] : en;
+    const span = (end - starts[i]) * .85, lw = lines.map(l=>l.length+4), lt = lw.reduce((a,b)=>a+b,0);
+    let a2 = 0; lines.forEach((l,j)=>{ out.push([starts[i] + a2/lt*span + adj, l]); a2 += lw[j]; });
+  });
+  return out;
+}
+function updateLyrics(){
+  if(sync.on) return;
+  const L = lineTimes(), t = au.currentTime; let idx = -1;
+  for(let i=0;i<L.length;i++) if(t >= L[i][0]) idx = i;
+  if(idx !== lastLine && idx >= 0 && !au.paused){
+    lastLine = idx;
+    const el = document.createElement("div"); el.className = "ly"; el.textContent = L[idx][1];
+    el.style.left = (5 + Math.random()*40) + "vw"; el.style.top = (25 + Math.random()*45) + "vh";
+    el.style.setProperty("--dx", (Math.random()*160-80)+"px");
+    el.style.setProperty("--r", (Math.random()*8-4)+"deg");
+    $("lyrics").appendChild(el); setTimeout(()=>el.remove(), 7200);
+  }
+}
+au.addEventListener("seeked", ()=> lastLine = -1);
+
+/* ---- tap sync: one tap per stanza ---- */
+const sync = {on:false, i:0, t:[]};
+function showSync(){
+  const b = $("syncbox"); b.style.display = "block";
+  b.innerHTML = `TAP <b>SPACE</b> (or click here) when this stanza starts:<br><br><span style="color:var(--cyan)">${sync.i+1}/${stanzas.length}: ${stanzas[sync.i][0]}</span>`;
+}
+$("sy").onclick = () => { sync.on = true; sync.i = 0; sync.t = []; au.currentTime = 0; au.play(); showSync(); };
+function tap(){
+  if(!sync.on) return;
+  sync.t.push(+au.currentTime.toFixed(2)); sync.i++;
+  if(sync.i >= stanzas.length){
+    sync.on = false; CONFIG.STANZA_TIMES = sync.t; lastLine = -1;
+    $("syncbox").innerHTML = `Done. Timing is active now. To keep it, paste this into CONFIG:<br>STANZA_TIMES: <textarea readonly>${JSON.stringify(sync.t)}</textarea><br><button onclick="this.parentNode.style.display='none'">Close</button>`;
+    au.currentTime = 0;
+  } else showSync();
+}
+$("syncbox").addEventListener("click", e => e.target.tagName==="BUTTON"||e.target.tagName==="TEXTAREA"||tap());
+addEventListener("keydown", e => { if(e.code==="Space" && sync.on){ e.preventDefault(); tap(); } if(e.key==="[") adj-=.5; if(e.key==="]") adj+=.5; });
+$("m1").onclick = () => { adj -= .5; lastLine=-1; };
+$("p1").onclick = () => { adj += .5; lastLine=-1; };
+
+/* ---- main loop ---- */
+function frame(ms){
+  const t = ms/1000;
+  readAudio(t);
+  document.documentElement.style.setProperty("--b", bass.toFixed(3));
+  $("lyrics").style.transform = `translateY(${-bass*8}px) scale(${1+bass*.03})`;
+  drawTerrain(t); updateLyrics();
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
