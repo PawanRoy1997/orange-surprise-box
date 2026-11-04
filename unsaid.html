@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unsaid: for everything you never said</title>
+<meta name="description" content="Occasion gifts for your partner: earrings, bracelets, bangles, love notes, songs and surprise websites.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#1f1020; --plum:#2e1830; --rose:#e9a8b8; --blush:#f6e4e8;
+  --gold:#d4aa6a; --mist:#b9a3bd;
+  --serif:'Cormorant Garamond',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--night);color:var(--blush);font:17px/1.65 var(--sans);overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+
+/* nav */
+nav{position:fixed;inset:0 0 auto 0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;background:linear-gradient(var(--night),transparent)}
+.logo{font:italic 600 26px var(--serif);text-decoration:none;color:var(--rose)}
+nav a.cta{font-size:15px;text-decoration:none;border:1px solid var(--rose);padding:7px 18px;border-radius:99px;transition:.25s}
+nav a.cta:hover{background:var(--rose);color:var(--night)}
+
+/* hero */
+.hero{min-height:100svh;display:grid;place-items:center;text-align:center;position:relative;padding:110px 24px 70px;
+  background:radial-gradient(ellipse at 50% 40%,#4a2447 0%,var(--night) 68%)}
+.whispers{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.whispers span{position:absolute;bottom:-40px;font:italic 400 clamp(16px,2.2vw,24px) var(--serif);color:var(--mist);opacity:0;white-space:nowrap;
+  animation:drift var(--d) linear var(--delay) infinite}
+@keyframes drift{0%{transform:translateY(0);opacity:0}15%{opacity:.7}70%{opacity:.25;filter:blur(0)}100%{transform:translateY(-105vh);opacity:0;filter:blur(3px)}}
+.hero h1{font:italic 400 clamp(76px,17vw,190px)/.95 var(--serif);color:var(--blush);letter-spacing:-.02em;position:relative}
+.hero h1 b{display:inline-block;font-weight:400;opacity:0;transform:translateY(.25em);filter:blur(10px);animation:say 1.3s ease forwards}
+@keyframes say{to{opacity:1;transform:none;filter:none}}
+.hero .slogan{font:italic 500 clamp(20px,3vw,30px) var(--serif);color:var(--rose);margin-top:22px;opacity:0;animation:fade 1.4s 1.9s forwards}
+.hero p.sub{max-width:460px;margin:18px auto 34px;color:var(--mist);opacity:0;animation:fade 1.4s 2.4s forwards}
+.hero .btn{opacity:0;animation:fade 1.4s 2.8s forwards}
+@keyframes fade{to{opacity:1}}
+.btn{display:inline-block;background:var(--rose);color:var(--night);padding:13px 30px;border-radius:99px;text-decoration:none;font-weight:500;border:0;cursor:pointer;font-size:16px;font-family:var(--sans);transition:transform .25s,background .25s}
+.btn:hover{background:var(--gold);transform:translateY(-2px)}
+
+/* sections */
+section{padding:110px 0}
+h2{font:italic 400 clamp(38px,6vw,64px)/1.1 var(--serif);margin-bottom:22px}
+.lead{max-width:560px;color:var(--mist);font-size:19px}
+
+/* story */
+.story{background:var(--plum)}
+.story .lead{color:var(--blush)}
+.strike{font:italic 400 clamp(22px,3.4vw,34px)/1.5 var(--serif);margin-top:40px;color:var(--mist)}
+.strike s{text-decoration-color:var(--rose);text-decoration-thickness:1px}
+.strike em{color:var(--rose)}
+
+/* gifts */
+.gifts ul{list-style:none;padding:0;margin-top:46px;border-top:1px solid #ffffff22}
+.gifts li{display:grid;grid-template-columns:minmax(150px,1fr) 2fr;gap:24px;align-items:baseline;padding:26px 6px;border-bottom:1px solid #ffffff22;transition:padding .35s,background .35s}
+.gifts li:hover{padding-left:22px;background:#ffffff08}
+.gifts h3{font:italic 500 clamp(28px,4vw,40px) var(--serif);color:var(--rose)}
+.gifts p{color:var(--mist)}
+@media(max-width:640px){.gifts li{grid-template-columns:1fr;gap:4px}}
+
+/* steps */
+.steps{background:var(--plum)}
+.steps ol{list-style:none;padding:0;margin-top:46px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:40px;counter-reset:s}
+.steps li{counter-increment:s;border-left:1px solid var(--gold);padding-left:20px}
+.steps li::before{content:counter(s);font:italic 600 44px var(--serif);color:var(--gold);display:block;line-height:1}
+.steps h3{font:600 22px var(--serif);margin:8px 0 4px}
+.steps p{color:var(--mist);font-size:16px}
+
+/* form */
+.contact{text-align:center}
+.contact .lead{margin:0 auto}
+form{max-width:620px;margin:46px auto 0;text-align:left;display:grid;gap:20px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.row{grid-template-columns:1fr}}
+label,legend{display:block;font-size:15px;color:var(--mist);margin-bottom:6px}
+input[type=text],input[type=email],input[type=tel],input[type=date],select,textarea{width:100%;background:#ffffff0d;border:1px solid #ffffff2e;border-radius:12px;padding:13px 15px;color:var(--blush);font:inherit;transition:border .25s,background .25s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--rose);background:#ffffff14}
+select option{color:#222}
+textarea{min-height:130px;resize:vertical}
+fieldset{border:0;padding:0;min-width:0}
+.checks{display:flex;flex-wrap:wrap;gap:10px}
+.checks label{margin:0;cursor:pointer}
+.checks input{position:absolute;opacity:0}
+.checks span{display:inline-block;padding:8px 16px;border:1px solid #ffffff38;border-radius:99px;color:var(--blush);font-size:15px;transition:.25s}
+.checks input:checked+span{background:var(--rose);border-color:var(--rose);color:var(--night)}
+.checks input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
+.hp{position:absolute;left:-9999px}
+#status{min-height:1.6em;text-align:center;font-family:var(--serif);font-style:italic;font-size:22px}
+#status.ok{color:var(--gold)} #status.err{color:#ff9aa8;font-family:var(--sans);font-style:normal;font-size:16px}
+.btn[disabled]{opacity:.6;cursor:wait}
+
+footer{text-align:center;padding:50px 24px 60px;color:var(--mist);font-size:15px}
+footer .logo{display:block;margin-bottom:6px}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}
+  .whispers{display:none} html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#top">Unsaid</a>
+  <a class="cta" href="#enquire">Enquire</a>
+</nav>
+
+<header class="hero" id="top">
+  <div class="whispers" id="whispers" aria-hidden="true"></div>
+  <div>
+    <h1 aria-label="Unsaid"><b style="animation-delay:.2s">U</b><b style="animation-delay:.35s">n</b><b style="animation-delay:.5s">s</b><b style="animation-delay:.65s">a</b><b style="animation-delay:.8s">i</b><b style="animation-delay:.95s">d</b></h1>
+    <p class="slogan">for everything you never said</p>
+    <p class="sub">Thoughtful gifts for the woman you love, made for the moments that deserve more than a “thanks.”</p>
+    <a class="btn" href="#enquire">Say it with us</a>
+  </div>
+</header>
+
+<section class="story">
+  <div class="wrap">
+    <h2>Some feelings don’t fit in a sentence.</h2>
+    <p class="lead">You notice her. You remember the small things. And still, the words stay stuck. We turn what you feel into something she can hold, hear, or open, for her birthday, your anniversary, or a day that’s just hers.</p>
+    <p class="strike"><s>I’m fine.</s> <s>It’s nothing.</s> <s>Maybe later.</s><br><em>I’m grateful for you. I’m so glad it’s you.</em></p>
+  </div>
+</section>
+
+<section class="gifts" id="gifts">
+  <div class="wrap">
+    <h2>What we make for her</h2>
+    <p class="lead">Every gift is planned around your occasion and your story. Nothing off the shelf.</p>
+    <ul>
+      <li><h3>Earrings</h3><p>Small pieces she’ll wear every day and think of you each time.</p></li>
+      <li><h3>Bracelets</h3><p>Chosen to match her style, with an optional message tucked inside the packaging.</p></li>
+      <li><h3>Bangles</h3><p>Classic and festive designs, ready for celebrations big and small.</p></li>
+      <li><h3>Love notes</h3><p>Handwritten words shaped from your memories, so you finally say it.</p></li>
+      <li><h3>Songs</h3><p>An original song written around your story, with her name in it.</p></li>
+      <li><h3>Surprise websites</h3><p>A private web page for her alone: photos, memories, messages and a little reveal.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <ol>
+      <li><h3>Tell us the occasion</h3><p>Birthday, anniversary, apology, or just because. Share a few details about her.</p></li>
+      <li><h3>We design the surprise</h3><p>We suggest a gift or a combination, then craft it with you.</p></li>
+      <li><h3>You hand it over</h3><p>We deliver on time, beautifully packed. The words are yours to keep.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="contact" id="enquire">
+  <div class="wrap">
+    <h2>Tell us what you’ve never said</h2>
+    <p class="lead">Share a few details and we’ll get back to you with ideas.</p>
+
+    <form id="enquiry" novalidate>
+      <div class="row">
+        <div><label for="name">Your name</label><input type="text" id="name" required maxlength="80" autocomplete="name"></div>
+        <div><label for="contact">Phone or email</label><input type="text" id="contact" required maxlength="120" autocomplete="email"></div>
+      </div>
+      <div class="row">
+        <div><label for="occasion">Occasion</label>
+          <select id="occasion" required>
+            <option value="">Choose one</option>
+            <option>Birthday</option><option>Anniversary</option><option>Valentine’s Day</option>
+            <option>Proposal</option><option>Apology</option><option>Just because</option><option>Other</option>
+          </select></div>
+        <div><label for="date">Date needed by</label><input type="date" id="date"></div>
+      </div>
+      <fieldset>
+        <legend>What interests you?</legend>
+        <div class="checks">
+          <label><input type="checkbox" name="gift" value="Earrings"><span>Earrings</span></label>
+          <label><input type="checkbox" name="gift" value="Bracelets"><span>Bracelets</span></label>
+          <label><input type="checkbox" name="gift" value="Bangles"><span>Bangles</span></label>
+          <label><input type="checkbox" name="gift" value="Love notes"><span>Love notes</span></label>
+          <label><input type="checkbox" name="gift" value="Songs"><span>Songs</span></label>
+          <label><input type="checkbox" name="gift" value="Surprise website"><span>Surprise website</span></label>
+        </div>
+      </fieldset>
+      <div><label for="message">Tell us about her, and what you want to say</label><textarea id="message" maxlength="900"></textarea></div>
+      <div class="hp" aria-hidden="true"><label>Leave this empty<input type="text" id="website" tabindex="-1" autocomplete="off"></label></div>
+      <button class="btn" type="submit" id="send">Send enquiry</button>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <a class="logo" href="#top">Unsaid</a>
+  for everything you never said
+</footer>
+
+<script>
+/* ====== CONFIG: paste your Discord webhook URL here ====== */
+const WEBHOOK_URL = "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE";
+
+/* floating unsaid words */
+(function(){
+  const words = ["I miss you","thank you","I’m proud of you","stay","you matter to me","I’m sorry","I love your laugh","I choose you","you’re home to me","I noticed","forgive me","I’m lucky"];
+  const box = document.getElementById("whispers");
+  words.forEach((w,i)=>{
+    const s = document.createElement("span");
+    s.textContent = w;
+    s.style.left = (4 + (i*83)%86) + "%";
+    s.style.setProperty("--d", (14 + (i*5)%9) + "s");
+    s.style.setProperty("--delay", (3 + i*1.3) + "s");
+    box.appendChild(s);
+  });
+})();
+
+/* enquiry form -> Discord */
+const form = document.getElementById("enquiry");
+const statusEl = document.getElementById("status");
+const sendBtn = document.getElementById("send");
+document.getElementById("date").min = new Date().toISOString().split("T")[0];
+
+function show(msg, cls){ statusEl.textContent = msg; statusEl.className = cls || ""; }
+const clip = (t,n)=> (t||"").toString().trim().slice(0,n) || "Not provided";
+
+form.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  if (document.getElementById("website").value) return;           // bot trap
+  const name = document.getElementById("name").value.trim();
+  const contact = document.getElementById("contact").value.trim();
+  const occasion = document.getElementById("occasion").value;
+  if (!name || !contact || !occasion){ show("Please fill in your name, how to reach you, and the occasion.","err"); return; }
+  if (WEBHOOK_URL.includes("PASTE_YOUR")){ show("The enquiry form isn’t connected yet. Add the Discord webhook URL in index.html.","err"); return; }
+
+  const gifts = [...form.querySelectorAll("input[name=gift]:checked")].map(i=>i.value).join(", ");
+  const payload = {
+    username: "Unsaid Enquiries",
+    allowed_mentions: { parse: [] },
+    embeds: [{
+      title: "💌 New enquiry",
+      color: 0xE9A8B8,
+      fields: [
+        { name: "Name", value: clip(name,200), inline: true },
+        { name: "Contact", value: clip(contact,200), inline: true },
+        { name: "Occasion", value: clip(occasion,200), inline: true },
+        { name: "Needed by", value: clip(document.getElementById("date").value,50), inline: true },
+        { name: "Interested in", value: clip(gifts,500) },
+        { name: "Message", value: clip(document.getElementById("message").value,1000) }
+      ],
+      timestamp: new Date().toISOString()
+    }]
+  };
+
+  sendBtn.disabled = true; show("Sending…");
+  try{
+    const res = await fetch(WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!res.ok) throw new Error(res.status);
+    form.reset();
+    show("Received. We’ll write back soon.","ok");
+  }catch(err){
+    show("We couldn’t send your enquiry. Check your connection and try again.","err");
+  }finally{ sendBtn.disabled = false; }
+});
+</script>
+</body>
+</html>
