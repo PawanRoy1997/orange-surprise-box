@@ -199,9 +199,11 @@ footer .logo{display:block;margin-bottom:6px}
   for everything you never said
 </footer>
 
+
+
 <script>
-/* ====== CONFIG: paste your Discord webhook URL here ====== */
-const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1567555074358644900/Dzyi1eYRVj1KbLoSC23MBKUEB11VHm81DdLqHNdWSGJpc4ckL6_nF1cd7dMdHixXChSy";
+/* ====== CONFIG ====== */
+const RECEIVING_EMAIL = "soumyathumu@gmail.com";
 
 /* floating unsaid words */
 (function(){
@@ -217,53 +219,110 @@ const WEBHOOK_URL = "https://discordapp.com/api/webhooks/1567555074358644900/Dzy
   });
 })();
 
-/* enquiry form -> Discord */
+/* enquiry form -> professional email draft */
 const form = document.getElementById("enquiry");
 const statusEl = document.getElementById("status");
-const sendBtn = document.getElementById("send");
-document.getElementById("date").min = new Date().toISOString().split("T")[0];
 
-function show(msg, cls){ statusEl.textContent = msg; statusEl.className = cls || ""; }
-const clip = (t,n)=> (t||"").toString().trim().slice(0,n) || "Not provided";
+document.getElementById("date").min =
+  new Date().toISOString().split("T")[0];
 
-form.addEventListener("submit", async (e)=>{
+function show(msg, cls){
+  statusEl.textContent = msg;
+  statusEl.className = cls || "";
+}
+
+form.addEventListener("submit", (e)=>{
   e.preventDefault();
-  if (document.getElementById("website").value) return;           // bot trap
+
+  if (document.getElementById("website").value) return;
+
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
   const occasion = document.getElementById("occasion").value;
-  if (!name || !contact || !occasion){ show("Please fill in your name, how to reach you, and the occasion.","err"); return; }
-  if (WEBHOOK_URL.includes("PASTE_YOUR")){ show("The enquiry form isn’t connected yet. Add the Discord webhook URL in index.html.","err"); return; }
+  const date = document.getElementById("date").value;
+  const message = document.getElementById("message").value.trim();
 
-  const gifts = [...form.querySelectorAll("input[name=gift]:checked")].map(i=>i.value).join(", ");
-  const payload = {
-    username: "Unsaid Enquiries",
-    allowed_mentions: { parse: [] },
-    embeds: [{
-      title: "💌 New enquiry",
-      color: 0xE9A8B8,
-      fields: [
-        { name: "Name", value: clip(name,200), inline: true },
-        { name: "Contact", value: clip(contact,200), inline: true },
-        { name: "Occasion", value: clip(occasion,200), inline: true },
-        { name: "Needed by", value: clip(document.getElementById("date").value,50), inline: true },
-        { name: "Interested in", value: clip(gifts,500) },
-        { name: "Message", value: clip(document.getElementById("message").value,1000) }
-      ],
-      timestamp: new Date().toISOString()
-    }]
-  };
+  if (!name || !contact || !occasion){
+    show("Please fill in your name, how to reach you, and the occasion.","err");
+    return;
+  }
 
-  sendBtn.disabled = true; show("Sending…");
-  try{
-    const res = await fetch(WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    if(!res.ok) throw new Error(res.status);
-    form.reset();
-    show("Received. We’ll write back soon.","ok");
-  }catch(err){
-    show("We couldn’t send your enquiry. Check your connection and try again.","err");
-  }finally{ sendBtn.disabled = false; }
+  if (!RECEIVING_EMAIL){
+    show("The enquiry email address is not configured.","err");
+    return;
+  }
+
+  const gifts = [...form.querySelectorAll(
+    "input[name=gift]:checked"
+  )].map(i=>i.value);
+
+  const subject = "New Unsaid Enquiry - " + name + "  " + occasion;
+
+  const divider = "────────────────────────────────";
+
+  const body = [
+    "UNSAID | A THOUGHTFUL ENQUIRY",
+    "For everything you never said.",
+    "",
+    "Hello Unsaid Team,",
+    "",
+    "A new enquiry has been submitted through the Unsaid website.",
+    "Please find the details below.",
+    "",
+    divider,
+    "CUSTOMER DETAILS",
+    divider,
+    "",
+    "Name          : " + name,
+    "Contact       : " + contact,
+    "",
+    divider,
+    "OCCASION DETAILS",
+    divider,
+    "",
+    "Occasion      : " + occasion,
+    "Date required : " + (date || "Not specified"),
+    "",
+    "GIFT INTERESTS",
+    gifts.length
+      ? gifts.map((gift, i) => `${i + 1}. ${gift}`).join("\n")
+      : "No specific gift selected.",
+    "",
+    divider,
+    "THEIR MESSAGE",
+    divider,
+    "",
+    message || "No additional message provided.",
+    "",
+    divider,
+    "",
+    "NEXT STEP",
+    "Please review this enquiry and contact the customer to discuss",
+    "their requirements, recommendations and possible arrangements.",
+    "",
+    "This enquiry was submitted through the Unsaid website.",
+    "",
+    "Warm regards,",
+    "Unsaid",
+    "For everything you never said."
+  ].join("\n");
+
+  const gmailURL =
+    "https://mail.google.com/mail/?view=cm&fs=1" +
+    "&to=" + encodeURIComponent(RECEIVING_EMAIL) +
+    "&su=" + encodeURIComponent(subject) +
+    "&body=" + encodeURIComponent(body);
+
+  const newWindow = window.open(gmailURL, "_blank");
+
+  if (!newWindow) {
+    show("Please allow pop-ups to open your email draft.","err");
+    return;
+  }
+
+  show("Your enquiry email is ready. Please review it and press Send.","ok");
 });
 </script>
+
 </body>
 </html>
